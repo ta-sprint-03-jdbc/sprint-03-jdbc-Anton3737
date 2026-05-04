@@ -42,14 +42,14 @@ jobs:
               CONTEXT="$CONTEXT\n\n--- FILE: $file ---\n$CONTENT"
             fi
           done
-
+          
           PROMPT="You are a senior Java developer reviewing a student's JDBC assignment.
-
+          
           TASK DESCRIPTION:
           The student had to implement JUnit 5 tests for the ChildDB class — a JDBC-based DAO for managing Child entities in a PostgreSQL database.
-
+          
           The Child entity has: id (Long), firstName (String), lastName (String), birthDate (LocalDate), clubs (List<Club>).
-
+          
           Requirements for ChildDBTest:
           1. Test all ChildDAO methods: create, findById, findAll, update, delete (and any additional methods defined in ChildDAO).
           2. Use a real PostgreSQL database — no mocking.
@@ -57,40 +57,17 @@ jobs:
           4. Each test must be self-contained and not rely on the state left by other tests.
           5. Assertions must be meaningful: verify actual field values, not just that the result is non-null.
           6. Use try-with-resources or proper resource cleanup in the DAO (not in tests).
-
+          
           REVIEW only the ChildDBTest implementation and provide feedback in this structure:
-
+          
           ✅ WHAT IS DONE WELL:
           - List specific things the student implemented correctly
           - Mention good practices they followed
-
+          
           ⚠️ WHAT CAN BE IMPROVED:
           - List concrete issues or missed requirements
           - For each issue, provide a short example of how to fix it, like:
-
-            Instead of:
-            \`\`\`java
-            assertNotNull(child);
-            \`\`\`
-            Do this:
-            \`\`\`java
-            assertEquals("John", child.getFirstName());
-            assertEquals("Doe", child.getLastName());
-            \`\`\`
-
-          Keep feedback constructive, specific, and beginner-friendly.
-
-          Student's code:
-          $CONTEXT"
-
-          ✅ WHAT IS DONE WELL:
-          - List specific things the student implemented correctly
-          - Mention good practices they followed
-
-          ⚠️ WHAT CAN BE IMPROVED:
-          - List concrete issues or missed requirements
-          - For each issue, provide a short example of how to fix it, like:
-
+          
             Instead of:
             \`\`\`java
             Statement stmt = conn.createStatement();
@@ -101,14 +78,14 @@ jobs:
             PreparedStatement stmt = conn.prepareStatement(\"SELECT * FROM category WHERE id = ?\");
             stmt.setLong(1, id);
             \`\`\`
-
+          
           Keep feedback constructive, specific, and beginner-friendly.
-
+          
           Student's code:
           $CONTEXT"
-
+          
           ESCAPED_PROMPT=$(echo "$PROMPT" | python3 -c 'import json, sys; print(json.dumps(sys.stdin.read()))')
-
+          
           RESPONSE=$(curl -s https://api.anthropic.com/v1/messages \
             -H "x-api-key: $ANTHROPIC_API_KEY" \
             -H "anthropic-version: 2023-06-01" \
@@ -118,7 +95,7 @@ jobs:
               \"max_tokens\": 1024,
               \"messages\": [{\"role\": \"user\", \"content\": $ESCAPED_PROMPT}]
             }")
-
+          
           REVIEW_COMMENT=$(echo "$RESPONSE" | python3 -c '
           import json, sys
           res = json.load(sys.stdin)
@@ -127,7 +104,7 @@ jobs:
           else:
               print("Error: " + json.dumps(res))
           ')
-
+          
           echo "$REVIEW_COMMENT" > review.txt
 
       - name: Post Comment
