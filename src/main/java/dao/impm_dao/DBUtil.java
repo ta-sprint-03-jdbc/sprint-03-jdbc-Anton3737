@@ -1,4 +1,4 @@
-package dao;
+package dao.impm_dao;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;

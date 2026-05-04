@@ -1,5 +1,6 @@
-package dao;
+package dao.impm_dao;
 
+import dao.ChildDAO;
 import dao.exception.DatabaseException;
 import lombok.extern.slf4j.Slf4j;
 import model.Child;
@@ -18,6 +19,9 @@ public class ChildDB implements ChildDAO, AutoCloseable {
     private static final String SQL_DELETE_CHILD = "DELETE FROM child WHERE id = ?;";
     private static final String SQL_SELECT_CHILDREN_BY_MIN_AGE = "SELECT id, first_name, last_name, birth_date FROM child WHERE EXTRACT(YEAR FROM AGE(birth_date)) >= ?;";
     private static final String SQL_SELECT_CHILDREN_WITHOUT_BIRTHDATE = "SELECT id, first_name, last_name, birth_date FROM child WHERE birth_date IS NULL;";
+
+
+    private static final String SQL_SELECT_CHILD_BY_ID = "SELECT id, first_name, last_name, birth_date FROM child WHERE id = ?;";
 
     private final Connection conn;
     private final boolean ownsConnection;
@@ -140,6 +144,32 @@ public class ChildDB implements ChildDAO, AutoCloseable {
             return affectedRows == 1;
         }
     }
+
+
+    public Child findChildById(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Child ID cannot be null");
+        }
+        try (PreparedStatement stmt = conn.prepareStatement(SQL_SELECT_CHILD_BY_ID)) {
+
+            stmt.setLong(1, id); // Підставляємо ID замість знака питання
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return new Child(
+                            rs.getLong("id"),
+                            rs.getString("first_name"),
+                            rs.getString("last_name"),
+                            rs.getDate("birth_date") != null ? rs.getDate("birth_date").toLocalDate() : null
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
 
     @Override
     public List<Child> findChildrenWithMinimumAge(int age) throws SQLException {
