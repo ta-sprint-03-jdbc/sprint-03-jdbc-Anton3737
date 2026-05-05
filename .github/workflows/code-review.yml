@@ -154,15 +154,3 @@ jobs:
                 body: body
               });
             }
-
-  copilot-review:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    permissions:
-      contents: read
-      pull-requests: write
-    steps:
-      - name: GitHub Copilot Code Review
-        uses: github/copilot-code-review@v1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
